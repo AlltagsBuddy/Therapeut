@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Selbsthilfe-Therapeut nutzen | AlltagsBuddy</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    header {
+      background-color: #ffffff;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #eee;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo img {
+      height: 60px;
+    }
+    .logo span {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1BC7C2;
+    }
+    .cta-button {
+      background-color: #FF6B00;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    main {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    h1, h2 {
+      text-align: center;
+      color: #FF6B00;
+    }
+    .kategorie-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      justify-content: center;
+    }
+    .kategorie-buttons button {
+      background-color: #eee;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .kategorie-buttons button.active {
+      background-color: #FF6B00;
+      color: white;
+      border-color: #FF6B00;
+    }
+    #chat {
+      margin-top: 30px;
+      max-height: 400px;
+      overflow-y: auto;
+      background-color: #f4f4f4;
+      padding: 20px;
+      border-radius: 8px;
+    }
+    .message {
+      margin-bottom: 15px;
+    }
+    .user { color: #000; }
+    .bot { color: #1BC7C2; font-style: italic; }
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin-top: 20px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+    .submit {
+      background-color: #FF6B00;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      margin-top: 10px;
+      padding: 14px;
+      width: 100%;
+      border-radius: 10px;
+    }
+    #status {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .download-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+    footer {
+      text-align: center;
+      padding: 30px;
+      background-color: #1BC7C2;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <img src="logo.png" alt="AlltagsBuddy Logo" />
+    <span>AlltagsBuddy</span>
+  </div>
+  <a href="index.html" class="cta-button">Zurück zur Startseite</a>
+</header>
+<main>
+  <h1>Selbsthilfe-Therapeut</h1>
+  <p style="text-align:center">Wähle dein aktuelles Anliegen, schreibe deinem KI-Therapeuten und speichere den Verlauf.</p>
+
+  <div class="kategorie-buttons" id="anliegenButtons">
+    <button type="button" data-value="stress">Stress</button>
+    <button type="button" data-value="einsamkeit">Einsamkeit</button>
+    <button type="button" data-value="antriebslosigkeit">Antriebslosigkeit</button>
+    <button type="button" data-value="konflikte">Konflikte</button>
+    <button type="button" data-value="reflexion">Tagesreflexion</button>
+    <button type="button" data-value="achtsamkeit">Achtsamkeit</button>
+    <button type="button" data-value="notfall">Notfallhilfe</button>
+  </div>
+
+  <input type="hidden" id="anliegen" value="">
+  <textarea id="userInput" rows="4" placeholder="Schreibe hier deine Nachricht..."></textarea>
+  <button class="submit" id="sendBtn">Senden</button>
+
+  <div id="status"></div>
+  <div id="chat"></div>
+
+  <div class="download-buttons">
+    <button onclick="downloadChat('pdf')">📄 Als PDF speichern</button>
+    <button onclick="downloadChat('docx')">📝 Als Word speichern</button>
+  </div>
+</main>
+<footer>
+  &copy; 2025 AlltagsBuddy – Dein smarter KI-Buddy
+</footer>
+<script>
+  const buttons = document.querySelectorAll('#anliegenButtons button');
+  const selected = document.getElementById('anliegen');
+  const chat = document.getElementById('chat');
+  const status = document.getElementById('status');
+
+  let chatHistory = [];
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selected.value = btn.dataset.value;
+
+      if (btn.dataset.value === 'notfall') {
+        const notfallInfos = [
+          "📞 Telefonseelsorge: 0800 111 0 111 oder 0800 111 0 222",
+          "💬 Krisenchat (für junge Menschen): https://krisenchat.de",
+          "🛟 Caritas Online-Beratung: https://www.caritas.de/hilfeundberatung/onlineberatung/"
+        ];
+        notfallInfos.forEach(info => addToChat('bot', info));
+      }
+    });
+  });
+
+  document.getElementById('sendBtn').addEventListener('click', handleSend);
+  document.getElementById('userInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  });
+
+  function addToChat(sender, text) {
+    chatHistory.push({ sender, text });
+    const msg = document.createElement('div');
+    msg.classList.add('message');
+    msg.classList.add(sender);
+    msg.textContent = `${sender === 'user' ? 'Du' : 'AlltagsBuddy'}: ${text}`;
+    chat.appendChild(msg);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  async function handleSend() {
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    const anliegen = selected.value;
+    if (!text) {
+      status.innerText = '⚠️ Bitte gib eine Nachricht ein';
+      status.style.color = 'red';
+      return;
+    }
+
+    addToChat('user', text);
+    input.value = '';
+    status.innerText = '⏳ AlltagsBuddy denkt nach...';
+    status.style.color = '#333';
+
+    const res = await fetch('/api/therapeut', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        inhalt: text,
+        kategorie: anliegen
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) {
+      status.innerText = '❌ Fehler: ' + data.error;
+      status.style.color = 'red';
+      return;
+    }
+
+    addToChat('bot', data.antwort);
+    status.innerText = '';
+  }
+
+  function downloadChat(format) {
+    let content = "";
+    chatHistory.forEach(entry => {
+      content += `${entry.sender === 'user' ? 'Du' : 'AlltagsBuddy'}: ${entry.text}\n\n`;
+    });
+
+    const blob = new Blob([content], { type: format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = format === 'pdf' ? 'chat.pdf' : 'chat.docx';
+    a.click();
+  }
+</script>
+</body>
+</html>
