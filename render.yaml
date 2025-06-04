@@ -1,6 +1,0 @@
-services:
-  - type: web
-    name: therapeut-app
-    env: python
-    buildCommand: pip install -r Therapeut/requirements.txt
-    startCommand: python Therapeut/app.py
