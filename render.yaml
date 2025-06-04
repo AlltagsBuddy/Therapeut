@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: alltagsbuddy-therapeut
+    env: python
+    buildCommand: pip install -r Therapeut/requirements.txt
+    startCommand: python Therapeut/app.py
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false

@@ -156,8 +156,8 @@
   <div id="chat"></div>
 
   <div class="download-buttons">
-    <button onclick="downloadChat('pdf')">📄 Als PDF speichern</button>
-    <button onclick="downloadChat('docx')">📝 Als Word speichern</button>
+    <button onclick="downloadChat('docx')">📄 Als WORD speichern</button>
+    <button onclick="downloadChat('pdf')">📝 Als PDF speichern</button>
   </div>
 </main>
 <footer>
@@ -240,20 +240,30 @@
     addToChat('bot', data.antwort);
     status.innerText = '';
   }
+async function downloadChat(format) {
+  const endpoint = format === 'pdf' ? '/api/export/pdf' : '/api/export/docx';
 
-  function downloadChat(format) {
-    let content = "";
-    chatHistory.forEach(entry => {
-      content += `${entry.sender === 'user' ? 'Du' : 'AlltagsBuddy'}: ${entry.text}\n\n`;
-    });
+  const res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ chat: chatHistory })
+  });
 
-    const blob = new Blob([content], { type: format === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = format === 'pdf' ? 'chat.pdf' : 'chat.docx';
-    a.click();
+  if (!res.ok) {
+    alert("❌ Fehler beim Export: " + (await res.text()));
+    return;
   }
+
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = format === 'pdf' ? 'chat.pdf' : 'chat.docx';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
 </script>
 </body>
 </html>
